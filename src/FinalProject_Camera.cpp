@@ -20,6 +20,11 @@
 #include "lidarData.hpp"
 #include "camFusion.hpp"
 
+#include <iostream>
+#include <filesystem>
+using namespace std;
+namespace fs = std::__fs::filesystem;
+
 using namespace std;
 
 /* MAIN PROGRAM */
@@ -28,7 +33,11 @@ int main(int argc, const char *argv[])
     /* INIT VARIABLES AND DATA STRUCTURES */
 
     // data location
-    string dataPath = "../";
+   
+    //string dataPath = "/Users/lianhao/OneDrive/CodePath/DL/submission/sfnd_3D/";//;"../";
+    string dataPath = "/Users/lianhao/OneDrive/CodePath/DL/submission/sfnd_3D/";//;"../";
+    //string dataPath = "OneDrive/CodePath/DL/submission/sfnd_3D/";//;"../";
+    std::cout << "Current path is " << fs::current_path() << '\n';
 
     // camera
     string imgBasePath = dataPath + "images/";
@@ -129,18 +138,18 @@ int main(int argc, const char *argv[])
         clusterLidarWithROI((dataBuffer.end()-1)->boundingBoxes, (dataBuffer.end() - 1)->lidarPoints, shrinkFactor, P_rect_00, R_rect_00, RT);
 
         // Visualize 3D objects
-        bVis = true;
+        bVis = false;
         if(bVis)
         {
             show3DObjects((dataBuffer.end()-1)->boundingBoxes, cv::Size(4.0, 20.0), cv::Size(2000, 2000), true);
         }
-        bVis = false;
+        bVis = true;
 
         cout << "#4 : CLUSTER LIDAR POINT CLOUD done" << endl;
         
         
         // REMOVE THIS LINE BEFORE PROCEEDING WITH THE FINAL PROJECT
-        continue; // skips directly to the next image without processing what comes beneath
+        // continue; // skips directly to the next image without processing what comes beneath
 
         /* DETECT IMAGE KEYPOINTS */
 
@@ -150,16 +159,9 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SHITOMASI";
-
-        if (detectorType.compare("SHITOMASI") == 0)
-        {
-            detKeypointsShiTomasi(keypoints, imgGray, false);
-        }
-        else
-        {
-            //...
-        }
+        string detectorType = "BRISK";
+        
+        detKeypointsModern(keypoints, imgGray, detectorType, bVis);
 
         // optional : limit number of keypoints (helpful for debugging and learning)
         bool bLimitKpts = false;
@@ -199,9 +201,9 @@ int main(int argc, const char *argv[])
             /* MATCH KEYPOINT DESCRIPTORS */
 
             vector<cv::DMatch> matches;
-            string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-            string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-            string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+            string matcherType = "MAT_FLANN";        // MAT_BF, MAT_FLANN
+            string descriptorType = "DES_HOG"; // DES_BINARY, DES_HOG
+            string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
 
             matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
                              (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
@@ -210,6 +212,18 @@ int main(int argc, const char *argv[])
             // store matches in current data frame
             (dataBuffer.end() - 1)->kptMatches = matches;
 
+            // visualize results
+            bool bVis_debug = false;
+            if(bVis_debug)
+            {
+                cv::Mat matchImg = (dataBuffer.end() - 1)->cameraImg.clone();
+                cv::drawMatches((dataBuffer.end() - 2)->cameraImg, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->cameraImg, (dataBuffer.end() - 1)->keypoints, matches,
+                                matchImg, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+                string windowName = "Matching keypoints debug ";
+                cv::namedWindow(windowName, 7);
+                cv::imshow(windowName, matchImg);
+                cv::waitKey(0);
+            }
             cout << "#7 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
             
@@ -223,7 +237,7 @@ int main(int argc, const char *argv[])
 
             // store matches in current data frame
             (dataBuffer.end()-1)->bbMatches = bbBestMatches;
-
+            
             cout << "#8 : TRACK 3D OBJECT BOUNDING BOXES done" << endl;
 
 
@@ -257,14 +271,29 @@ int main(int argc, const char *argv[])
                     //// TASK FP.2 -> compute time-to-collision based on Lidar data (implement -> computeTTCLidar)
                     double ttcLidar; 
                     computeTTCLidar(prevBB->lidarPoints, currBB->lidarPoints, sensorFrameRate, ttcLidar);
+                    cout << "TTC Lidar is " << ttcLidar << endl;
                     //// EOF STUDENT ASSIGNMENT
 
                     //// STUDENT ASSIGNMENT
                     //// TASK FP.3 -> assign enclosed keypoint matches to bounding box (implement -> clusterKptMatchesWithROI)
                     //// TASK FP.4 -> compute time-to-collision based on camera (implement -> computeTTCCamera)
                     double ttcCamera;
-                    clusterKptMatchesWithROI(*currBB, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->kptMatches);                    
+                    clusterKptMatchesWithROI(*currBB, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->kptMatches);
                     computeTTCCamera((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, currBB->kptMatches, sensorFrameRate, ttcCamera);
+                    cout << "TTC Camera is " << ttcCamera << endl;
+
+                    bool bVis_debug = true;
+                    if(bVis_debug)
+                    {
+                        cv::Mat matchImg = (dataBuffer.end() - 1)->cameraImg.clone();
+                        cv::drawMatches((dataBuffer.end() - 2)->cameraImg, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->cameraImg, (dataBuffer.end() - 1)->keypoints, currBB->kptMatches,
+                                        matchImg, cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+                        string windowName = "boxed keypoints ";
+                        cv::namedWindow(windowName, 7);
+                        cv::imshow(windowName, matchImg);
+                        cv::waitKey(0);
+                    }
+                    
                     //// EOF STUDENT ASSIGNMENT
 
                     bVis = true;
