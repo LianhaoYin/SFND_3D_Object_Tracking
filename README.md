@@ -33,3 +33,48 @@ In this final project, you will implement the missing parts in the schematic. To
 2. Make a build directory in the top level project directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./3D_object_tracking`.
+
+The user needs to modify the string dataPath to its fold path in code of sfnd_3d/src/FinalProject_Camera.cpp before using.
+
+
+## details 
+
+### FP.1 Match 3D Objects
+Implement the method "matchBoundingBoxes", which takes as input both the previous and the current data frames and provides as output the ids of the matched regions of interest (i.e. the boxID property).
+function: matchBoundingBoxes()
+
+### FP.2 Compute Lidar-based TTC
+Compute the time-to-collision in second for all matched 3D objects using only Lidar measurements from the matched bounding boxes between current and previous frame.
+
+### FP.3 Associate Keypoint Correspondences with Bounding Boxes
+
+Prepare the TTC computation based on camera measurements by associating keypoint correspondences to the bounding boxes which enclose them. All matches which satisfy this condition must be added to a vector in the respective bounding box.
+
+### FP.4 Compute Camera-based TTC
+Compute the time-to-collision in second for all matched 3D objects using only keypoint correspondences from the matched bounding boxes between current and previous frame.
+
+### FP.5 Performance Evaluation 1
+Since the noise in Lidar points were filtered out by finding median points, there are no non-plausible values
+
+### FP.6 Performance Evaluation 2
+Run several detector / descriptor combinations and look at the differences in TTC estimation. 
+The results were found in results.rtf file. 
+The values of cam and Lidar are within certain ranges and no way off points.
+Some cases with good performance were listed here
+case:   det: SHITOMASI des: BRISK  ttc Lidar: 12.5156 cam: 12.7975 diff: 0.281923
+case:   det: SHITOMASI des: BRISK  ttc Lidar: 12.6142 cam: 12.9602 diff: 0.345963
+case:   det: SHITOMASI des: BRISK  ttc Lidar: 14.091 cam: 14.9277 diff: 0.836653
+case:   det: SHITOMASI des: BRISK  ttc Lidar: 13.1241 cam: 13.2405 diff: 0.116427
+case:   det: SHITOMASI des: BRISK  ttc Lidar: 11.1746 cam: 11.5712 diff: 0.396541
+case:   det: SHITOMASI des: ORB  ttc Lidar: 12.6142 cam: 12.6562 diff: 0.0419325
+case:   det: SHITOMASI des: ORB  ttc Lidar: 13.1241 cam: 13.9921 diff: 0.867963
+case:   det: SHITOMASI des: ORB  ttc Lidar: 8.3988 cam: 7.92121 diff: -0.477598
+case:   det: FAST des: ORB  ttc Lidar: 12.8086 cam: 12.4169 diff: -0.391691
+case:   det: FAST des: SIFT  ttc Lidar: 12.5156 cam: 12.463 diff: -0.0526311
+case:   det: ORB des: BRISK  ttc Lidar: 9.59863 cam: 9.63066 diff: 0.0320324
+case:   det: SIFT des: SIFT  ttc Lidar: 12.6142 cam: 12.6109 diff: -0.00338843
+case:   det: AKAZE des: AKAZE  ttc Lidar: -0.680202 cam: -0.620664 diff: 0.059538
+
+
+
+
