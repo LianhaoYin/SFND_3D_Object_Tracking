@@ -39,24 +39,24 @@ The user needs to modify the string dataPath to its fold path in code of sfnd_3d
 
 ## details 
 
-### FP.1 Match 3D Objects
+* FP.1 Match 3D Objects
 Implement the method "matchBoundingBoxes", which takes as input both the previous and the current data frames and provides as output the ids of the matched regions of interest (i.e. the boxID property).
 function: matchBoundingBoxes()
 
-### FP.2 Compute Lidar-based TTC
+* FP.2 Compute Lidar-based TTC
 Compute the time-to-collision in second for all matched 3D objects using only Lidar measurements from the matched bounding boxes between current and previous frame.
 
-### FP.3 Associate Keypoint Correspondences with Bounding Boxes
+* FP.3 Associate Keypoint Correspondences with Bounding Boxes
 
 Prepare the TTC computation based on camera measurements by associating keypoint correspondences to the bounding boxes which enclose them. All matches which satisfy this condition must be added to a vector in the respective bounding box.
 
-### FP.4 Compute Camera-based TTC
+* FP.4 Compute Camera-based TTC
 Compute the time-to-collision in second for all matched 3D objects using only keypoint correspondences from the matched bounding boxes between current and previous frame.
 
-### FP.5 Performance Evaluation 1
+* FP.5 Performance Evaluation 1
 Since the noise in Lidar points were filtered out by finding median points, there are no non-plausible values
 
-### FP.6 Performance Evaluation 2
+* FP.6 Performance Evaluation 2
 Run several detector / descriptor combinations and look at the differences in TTC estimation. 
 The results were found in results.rtf file. 
 The values of cam and Lidar are within certain ranges and no way off points.
