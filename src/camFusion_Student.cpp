@@ -139,6 +139,14 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
     // ...FP.3 : Associate Keypoint Correspondences with Bounding Boxes Before a TTC estimate can be computed in the next exercise, you need to find all keypoint matches that belong to each 3D object. You can do this by simply checking wether the corresponding keypoints are within the region of interest in the camera image. All matches which satisfy this condition should be added to a vector. The problem you will find is that there will be outliers among your matches. To eliminate those, I recommend that you compute a robust mean of all the euclidean distances between keypoint matches and then remove those that are too far away from the mean.
     //The task is complete once the code performs as described and adds the keypoint correspondences to the "kptMatches" property of the respective bounding boxes. Also, outlier matches have been removed based on the euclidean distance between them in relation to all the matches in the bounding box.
     
+    // Loop over all matches in the current frame
+   //for test
+    for (cv::DMatch match : kptMatches) {
+        if (boundingBox.roi.contains(kptsCurr[match.trainIdx].pt)) {
+            boundingBox.kptMatches.push_back(match);
+        }
+    }
+    /*
     // loop the kptmatches and find the kpts pre and cuur in bounding box, and calculate the means distance
     float dis_sum = 0;
     int nr_dis = 0;
@@ -169,7 +177,7 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
             boundingBox.kptMatches.push_back(*it_kps);
         }
     }
-    
+     */
 }
 
 
@@ -216,10 +224,14 @@ void computeTTCCamera(std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPo
     }
     
     // compute camera-based TTC from distance ratios
-    double meanDistRatio = std::accumulate(distRatios.begin(), distRatios.end(), 0.0) / distRatios.size();
+
+    // median instead
+    std::sort(distRatios.begin(), distRatios.end());
+    double medianDistRatio = distRatios[distRatios.size() / 2];
     
-    double dT = 1 / frameRate;
-    TTC = -dT / (1 - meanDistRatio);
+    TTC = (-1.0 / frameRate) / (1 - medianDistRatio);
+
+
     
     
 }
@@ -229,33 +241,25 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
                      std::vector<LidarPoint> &lidarPointsCurr, double frameRate, double &TTC)
 {
     // auxiliary variables
-    double dT = 0.1;        // time between two measurements in seconds
-    double laneWidth = 4.0; // assumed width of the ego lane
+    double dT = 1 / frameRate;
+    double laneWidth = 5.0; // assumed width of the ego lane
+
+    // find the median values
+    std::sort(lidarPointsPrev.begin(), lidarPointsPrev.end(), [](LidarPoint pointA, LidarPoint pointB){
+        return pointA.x < pointB.x;
+    });
     
-    // find closest distance to Lidar points within ego lane
-    cout << "ttc = " << "pr" << "s" << endl;
-    double minXPrev = 1e9, minXCurr = 1e9;
-    for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
-    {
-        if(it ->y < laneWidth / 2.0 )
-        {
-            minXPrev = minXPrev > it->x ? it->x : minXPrev;
-        }
-    }
-    cout << "ttc = " << "pr" << "s" << endl;
+    double Xpre =  lidarPointsPrev[lidarPointsPrev.size()/2].x;
     
-    
-    for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
-    {
-        if(it ->y < laneWidth / 2.0 )
-        {
-            minXCurr = minXCurr > it->x ? it->x : minXCurr;
-        }
-    }
-    
+    std::sort(lidarPointsCurr.begin(), lidarPointsCurr.end(), [](LidarPoint pointA, LidarPoint pointB){
+        return pointA.x < pointB.x;
+    });
+    double Xcurr =  lidarPointsCurr[lidarPointsCurr.size()/2].x;
+
     // compute TTC from both measurements
-    TTC = minXCurr * dT / (minXPrev - minXCurr);
+    TTC = Xcurr * dT / (Xpre - Xcurr);
 }
+
 
 void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bbBestMatches, DataFrame &prevFrame, DataFrame &currFrame)
 {

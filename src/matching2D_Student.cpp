@@ -16,7 +16,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     {
         int normType = descriptorType.compare("DES_BINARY") == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
         matcher = cv::BFMatcher::create(normType, crossCheck);
-        cout << "BF matching cross-check=" << crossCheck;
+        //cout << "BF matching cross-check=" << crossCheck;
         
     }
     else if (matcherType.compare("MAT_FLANN") == 0)
@@ -28,7 +28,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
         }
 
         matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
-        cout << "FLANN matching";
+        //cout << "FLANN matching";
     }
     
     
@@ -51,7 +51,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
         double t = (double)cv::getTickCount();
         matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
         t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-        cout << " (NN) with n=" << matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
+        //cout << " (NN) with n=" << matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
 
     }
     else if (selectorType.compare("SEL_KNN") == 0)
@@ -62,8 +62,8 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
         descSource.convertTo(descSource, CV_32FC1);
         descRef.convertTo(descRef, CV_32FC1);
 
-        cout << "szie of descsource" << descSource.size << "szie of descRef" << descRef.size <<endl;
-        cout << "szie of keypoint descsource" << kPtsSource.size() << "szie of keypoint descRef" << kPtsRef.size() <<endl;
+        //cout << "szie of descsource" << descSource.size << "szie of descRef" << descRef.size <<endl;
+        //cout << "szie of keypoint descsource" << kPtsSource.size() << "szie of keypoint descRef" << kPtsRef.size() <<endl;
 
         if(kPtsSource.size()>=2 && kPtsRef.size()>=2)
         {
@@ -75,7 +75,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
             
         }
         t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-        cout << " (KNN) with n=" << knn_matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
+        //cout << " (KNN) with n=" << knn_matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
 
         // filter matches using descriptor distance ratio test
         double minDescDistRatio = 0.8;
@@ -88,7 +88,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
             }
             
         }
-        cout << "# keypoints removed = " << knn_matches.size() - matches.size() << endl;
+        //cout << "# keypoints removed = " << knn_matches.size() - matches.size() << endl;
         // ...
     }
 }
@@ -143,7 +143,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descr
 
     //extractor->compute(img, keypoints, descriptors);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" << endl;
 }
 
 //Detect keypoints in image by using one of the detector
@@ -175,7 +175,7 @@ void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
         keypoints.push_back(newKeyPoint);
     }
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     
     // visualize results
     if (bVis)
@@ -254,7 +254,7 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
         } // eof loop over cols
     }     // eof loop over rows
     
-    std::cout<<"keypoints size "<<keypoints.size()<<endl;
+    //std::cout<<"keypoints size "<<keypoints.size()<<endl;
     if (bVis)
     {
         cv::Mat visImage_clone = img.clone();
@@ -274,15 +274,16 @@ void detKeypointsBRISK(std::vector<cv::KeyPoint> &keypoints, cv::Mat &imgGray, b
     double t = (double)cv::getTickCount();
     detector->detect(imgGray, keypoints);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "BRISK detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << "BRISK detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     
+    /*
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::BRISK::create();
     cv::Mat descBRISK;
     t = (double)cv::getTickCount();
     descriptor->compute(imgGray, keypoints, descBRISK);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "BRISK descriptor in " << 1000 * t / 1.0 << " ms" << endl;
-    
+    //cout << "BRISK descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    */
     // visualize results
     if (bVis)
     {
@@ -302,15 +303,16 @@ void detKeypointsORB(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bV
     double t = (double)cv::getTickCount();
     detector->detect(img, keypoints);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "BRISK detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << "BRISK detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     
+    /*
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
     cv::Mat descORB;
     t = (double)cv::getTickCount();
     descriptor->compute(img, keypoints, descORB);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "ORB descriptor in " << 1000 * t / 1.0 << " ms" << endl;
-    
+    //cout << "ORB descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    */
     // visualize results
     if (bVis)
     {
@@ -331,15 +333,16 @@ void detKeypointsFAST(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
     double t = (double)cv::getTickCount();
     detector->detect(img, keypoints);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "FAST detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << "FAST detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     
+    /*
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::FastFeatureDetector::create();
     cv::Mat descFAST;
     t = (double)cv::getTickCount();
     descriptor->compute(img, keypoints, descFAST);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "FAST descriptor in " << 1000 * t / 1.0 << " ms" << endl;
-    
+    //cout << "FAST descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    */
     // visualize results
     if (bVis)
     {
@@ -360,15 +363,16 @@ void detKeypointsAKAZE(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool 
     double t = (double)cv::getTickCount();
     detector->detect(img, keypoints);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "AKAZE detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << "AKAZE detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     
+    /*
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::AKAZE::create();
     cv::Mat descAKAZE;
     t = (double)cv::getTickCount();
     descriptor->compute(img, keypoints, descAKAZE);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "AKAZE descriptor in " << 1000 * t / 1.0 << " ms" << endl;
-    
+    //cout << "AKAZE descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    */
     // visualize results
     if (bVis)
     {
@@ -387,15 +391,16 @@ void detKeypointsSIFT(std::vector<cv::KeyPoint> &keypoints, cv::Mat &imgGray, bo
     double t = (double)cv::getTickCount();
     detector->detect(imgGray, keypoints);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "SIFT detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //cout << "SIFT detector with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
     
+    /*
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::xfeatures2d::SiftDescriptorExtractor::create();
     cv::Mat descSIFT;
     t = (double)cv::getTickCount();
     descriptor->compute(imgGray, keypoints, descSIFT);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "SIFT descriptor in " << 1000 * t / 1.0 << " ms" << endl;
-    
+    //cout << "SIFT descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    */
     // visualize results
     if (bVis)
     {
@@ -422,39 +427,47 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std:
     det_str["FAST"] = 7;
     //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
     
-    cout << "slected switch" << det_str[detectorType] << endl;
+    //cout << "slected switch" << det_str[detectorType] << endl;
+    cv::Ptr<cv::FeatureDetector> fast = cv::FastFeatureDetector::create();
+
     switch(det_str[detectorType])
     {
         case 1:
-            cout << "slected ShiTomasi"<< endl;
+            //cout << "slected ShiTomasi"<< endl;
             detKeypointsShiTomasi(keypoints, img,bVis);
             break;
         case 2:
-            cout << "slected Harris"<< endl;
+            //cout << "slected Harris"<< endl;
             detKeypointsHarris(keypoints, img,bVis);
             break;
         case 3:
-            cout << "slected ORB"<< endl;
+            //cout << "slected ORB"<< endl;
             detKeypointsORB(keypoints, img,bVis);
+            //auto orb = cv::ORB::create();
+            //orb->detect(img, keypoints);
             break;
         case 4:
-            cout << "slected AKAZE"<< endl;
+            //cout << "slected AKAZE"<< endl;
             detKeypointsAKAZE(keypoints, img,bVis);
+            //auto akaze = cv::AKAZE::create();
+            //akaze->detect(img, keypoints);
             break;
         case 5:
-            cout << "slected SIFT"<< endl;
+            //cout << "slected SIFT"<< endl;
             detKeypointsSIFT(keypoints, img,bVis);
+            //auto sift = cv::xfeatures2d::SIFT::create();
+            //sift->detect(img, keypoints);
             break;
         case 6:
-            cout << "slected BRISK"<< endl;
+            //cout << "slected BRISK"<< endl;
             detKeypointsBRISK(keypoints, img,bVis);
+            //auto brisk = cv::BRISK::create();
+            //brisk->detect(img, keypoints);
             break;
         case 7:
-            cout << "slected BRISK"<< endl;
-            // detKeypointsFAST(keypoints, img,bVis);
-            detKeypointsBRISK(keypoints, img,bVis);
+            //cout << "slected FAST"<< endl; //detKeypointsFAST(keypoints, img,bVis);
+            fast->detect(img, keypoints);
             break;
-            
         default:
             break;
             //break;
